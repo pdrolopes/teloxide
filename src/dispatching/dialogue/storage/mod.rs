@@ -1,5 +1,8 @@
 mod in_mem_storage;
 
+#[cfg(feature = "redis-storage")]
+mod redis;
+
 use futures::future::BoxFuture;
 pub use in_mem_storage::InMemStorage;
 use std::sync::Arc;
