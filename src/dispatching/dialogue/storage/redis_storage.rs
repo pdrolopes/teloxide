@@ -66,13 +66,15 @@ where
     ) -> BoxFuture<'static, Result<Option<D>>> {
         Box::pin(async move {
             let mut conn = self.client.get_async_connection().await?;
-            let old_val: Option<D> = conn
-                .get::<_, Option<Vec<u8>>>(chat_id)
+            Ok(redis::pipe()
+                .atomic()
+                .get(chat_id)
+                .del(chat_id)
+                .ignore()
+                .query_async::<_, Option<Vec<u8>>>(&mut conn)
                 .await?
                 .map(|d| self.serializer.deserialize(&d))
-                .transpose()?;
-            conn.del(chat_id).await?;
-            Ok(old_val)
+                .transpose()?)
         })
     }
 
