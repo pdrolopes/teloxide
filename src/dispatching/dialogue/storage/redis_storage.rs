@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused_imports)]
-
 use super::Storage;
 use futures::future::BoxFuture;
 use redis::{AsyncCommands, IntoConnectionInfo};

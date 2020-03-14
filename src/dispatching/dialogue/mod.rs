@@ -54,4 +54,4 @@ pub use dialogue_dispatcher_handler::DialogueDispatcherHandler;
 pub use dialogue_dispatcher_handler_cx::DialogueDispatcherHandlerCx;
 pub use dialogue_stage::{exit, next, DialogueStage};
 pub use get_chat_id::GetChatId;
-pub use storage::{InMemStorage, Storage};
+pub use storage::{InMemStorage, RedisStorage, Storage, JSON};

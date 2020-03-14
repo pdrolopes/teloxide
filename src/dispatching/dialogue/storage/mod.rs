@@ -1,10 +1,12 @@
 mod in_mem_storage;
 
 #[cfg(feature = "redis-storage")]
-mod redis;
+mod redis_storage;
 
 use futures::future::BoxFuture;
 pub use in_mem_storage::InMemStorage;
+#[cfg(feature = "redis-storage")]
+pub use redis_storage::{RedisStorage, JSON};
 use std::sync::Arc;
 
 /// A storage of dialogues.
