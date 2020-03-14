@@ -4,41 +4,17 @@ use redis::{AsyncCommands, IntoConnectionInfo};
 use serde::{de::DeserializeOwned, Serialize};
 use std::sync::Arc;
 use thiserror::Error;
-pub use Serializer::*;
+use super::serializer::{self, Serializer};
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("Failed parsing/serializing JSON: {0}")]
-    JSONError(#[from] serde_json::Error),
-    #[error("Error from Redis: {0}")]
+    #[error("{0}")]
+    SerdeError(#[from] serializer::Error),
+    #[error("error from Redis: {0}")]
     RedisError(#[from] redis::RedisError),
 }
 
 type Result<T, E = Error> = std::result::Result<T, E>;
-
-pub enum Serializer {
-    JSON,
-}
-
-impl Serializer {
-    pub fn serialize<D>(&self, val: &D) -> Result<Vec<u8>>
-    where
-        D: Serialize,
-    {
-        Ok(match self {
-            JSON => serde_json::to_vec(val)?,
-        })
-    }
-
-    pub fn deserialize<'de, D>(&self, data: &'de [u8]) -> Result<D>
-    where
-        D: DeserializeOwned,
-    {
-        Ok(match self {
-            JSON => serde_json::from_slice(data)?,
-        })
-    }
-}
 
 pub struct RedisStorage {
     client: redis::Client,

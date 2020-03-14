@@ -24,8 +24,11 @@ authors = [
 maintenance = { status = "actively-developed" }
 
 [features]
-default = ["redis-storage"]
+# FIXME: disable these before merging
+default = ["redis-storage", "cbor-serializer", "bincode-serializer"]
 redis-storage = ["redis"]
+cbor-serializer = ["serde_cbor"]
+bincode-serializer = ["bincode"]
 
 [dependencies]
 serde_json = "1.0.44"
@@ -48,6 +51,8 @@ pin-project = "0.4.6"
 serde_with_macros = "1.0.1"
 
 redis = { version = "0.15.1", optional = true }
+serde_cbor = { version = "0.11.1", optional = true }
+bincode = { version = "1.2.1", optional = true }
 
 teloxide-macros = "0.2.1"
 
