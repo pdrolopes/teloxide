@@ -60,6 +60,8 @@ where
 {
     type Error = Error;
 
+    // `.del().ignore()` is much more readable than `.del()\n.ignore()`
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn remove_dialogue(
         self: Arc<Self>,
         chat_id: i64,
@@ -69,8 +71,7 @@ where
             Ok(redis::pipe()
                 .atomic()
                 .get(chat_id)
-                .del(chat_id)
-                .ignore()
+                .del(chat_id).ignore()
                 .query_async::<_, Option<Vec<u8>>>(&mut conn)
                 .await?
                 .map(|d| self.serializer.deserialize(&d))
