@@ -6,7 +6,7 @@ use futures::future::BoxFuture;
 use std::sync::Arc;
 use redis::{AsyncCommands, IntoConnectionInfo};
 use thiserror::Error;
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, de::DeserializeOwned};
 pub use Serializer::*;
 
 
@@ -33,7 +33,7 @@ impl Serializer {
     }
 
     pub fn deserialize<'de, D>(&self, data: &'de [u8]) -> Result<D>
-    where D: Deserialize<'de> {
+    where D: DeserializeOwned {
         Ok(match self {
             JSON => serde_json::from_slice(data)?
         })
@@ -54,8 +54,8 @@ impl RedisStorage {
     }
 }
 
-impl<'de, D> Storage<D> for RedisStorage 
-where D: Send + Serialize + Deserialize<'de> {
+impl<D> Storage<D> for RedisStorage 
+where D: Send + Serialize + DeserializeOwned + 'static {
     type Error = Error;
 
     fn remove_dialogue(
@@ -81,6 +81,21 @@ where D: Send + Serialize + Deserialize<'de> {
         chat_id: i64,
         dialogue: D
     ) -> BoxFuture<'static, Result<Option<D>>> {
-        todo!()
+        Box::pin(
+            async move {
+                let mut conn = self.client.get_async_connection().await?;
+                let dialogue = self.serializer.serialize(&dialogue)?;
+                Ok(
+                    conn
+                        .getset::<_, Vec<u8>, Option<Vec<u8>>>(
+                            chat_id,
+                            dialogue
+                        )
+                        .await?
+                        .map(|d| self.serializer.deserialize(&d))
+                        .transpose()?
+                )
+            }
+        )
     }
 }
